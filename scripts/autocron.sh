@@ -4,7 +4,8 @@
 COMMAND=$1
 
 missing_source () {
-	read -r -p "Please specify the /path/you/want/to/backup " BACKUP_PATH
+	read -e -r -p "Please specify the /path/you/want/to/backup: " BACKUP_PATH
+	BACKUP_PATH="${BACKUP_PATH/#\~/$HOME}" #Replace ~ with home directory
 
 	if [ ! -z "$BACKUP_PATH" ]; then
 		if [ ! -d "$BACKUP_PATH" ]; then
@@ -20,6 +21,7 @@ missing_source () {
 
 missing_destination () {
 	read -r -p "Please specify the /path/you/want/to/backup/to " BACKUP_DESTINATION_PATH
+	BACKUP_DESTINATION_PATH="${BACKUP_DESTINATION_PATH/#\~/$HOME}" #Replace ~ with home directory
 
 	if [ -z "$BACKUP_DESTINATION_PATH" ]; then
 		missing_destination
