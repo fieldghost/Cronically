@@ -20,7 +20,7 @@ missing_source () {
 }
 
 missing_destination () {
-	read -r -p "Please specify the /path/you/want/to/backup/to " BACKUP_DESTINATION_PATH
+	read -e -r -p "Please specify the /path/you/want/to/backup/to " BACKUP_DESTINATION_PATH
 	BACKUP_DESTINATION_PATH="${BACKUP_DESTINATION_PATH/#\~/$HOME}" #Replace ~ with home directory
 
 	if [ -z "$BACKUP_DESTINATION_PATH" ]; then
@@ -30,18 +30,29 @@ missing_destination () {
 	fi
 }
 
-execute_backup () {
-	DAY=$(date +%A)	
-	FILE_NAME="$DAY.tgz"
+missing_time () {
+	read -r -p "Please specifiy the timestamp of the job, eg '14:00': " TIME_STAMP
 
-	tar czf "$1"/"$FILE_NAME" "$2"
-	
-	if [ $? -eq 0 ]; then
-		echo "Backup of "$BACKUP_SOURCE_DIRECTORY" finished."
+	if [ -z "$TIME_STAMP" ]; then
+		missing_time
 	else
-		echo "Backup of "$BACKUP_SOURCE_DIRECTORY" failed."
+		TIME="$TIME_STAMP"
+	fi
+}
+
+
+execute_backup () {
+	#$1 = destination directory, $2 = Source directory, $3 = time (for crontab)
+
+	echo "Executing backup scheduler"
+	./executecron.sh "backup" "$2" "$1" "$3"
+
+	if [ $? -eq 0 ]; then
+		echo "Backup scheduled for $2 at $3"
+	else
+		echo "Schedule failed".
 		exit 1
-	fi	
+	fi
 }
 
 
@@ -50,7 +61,8 @@ case $COMMAND in
 	"backup")
 		BACKUP_SOURCE_DIRECTORY=$2
 		BACKUP_DESTINATION_DIRECTORY=$3
-				
+		TIME=$4
+
 		if [ -z "$BACKUP_SOURCE_DIRECTORY" ]; then
 			missing_source 	
 		fi	
@@ -62,6 +74,10 @@ case $COMMAND in
 		if [ ! -d "$BACKUP_SOURCE_DIRECTORY" ]; then
 			echo "$BACKUP_SOURCE_DIRECTORY does not exit"
 			missing_source
+		fi
+
+		if [ -z "$TIME" ]; then
+			missing_time
 		fi
 
 		if [ ! -d "$BACKUP_DESTINATION_DIRECTORY" ]; then
@@ -90,7 +106,7 @@ case $COMMAND in
 		fi		
 		
 		echo "Executing backup."
-		execute_backup "$BACKUP_DESTINATION_DIRECTORY" "$BACKUP_SOURCE_DIRECTORY"				
+		execute_backup "$BACKUP_DESTINATION_DIRECTORY" "$BACKUP_SOURCE_DIRECTORY" "$TIME"				
 		;;
 
 	"archive")
