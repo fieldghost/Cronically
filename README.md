@@ -1,3 +1,8 @@
+
+<img width="1408" height="768" alt="unicron" src="https://github.com/user-attachments/assets/79bf4ee7-b5f9-4220-9433-6b199aedb445" />
+
+*AI generated*
+
 # Unicron
 
 > "Because I keep forgetting the god damn command to use crontab."
